@@ -14,6 +14,6 @@ export const generateSequelizeModule = (forTesting = false) =>
       password: config.getOrThrow('DB_PASSWORD'),
       database: config.getOrThrow('DB_DATABASE'),
       models: [User],
-      logging: !forTesting,
+      logging: forTesting ? false : (...data) => console.log(...data),
     }),
   });
