@@ -21,7 +21,7 @@ export class FailedBirthdayNofication extends Model {
   birthday_date!: Date;
 
   @Column(DataType.ARRAY(DataType.DATE))
-  failed_history!: Date[];
+  failed_history!: string[];
 
   @BelongsTo(() => User)
   user!: User;

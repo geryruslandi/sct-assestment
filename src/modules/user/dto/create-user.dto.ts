@@ -2,6 +2,7 @@ import * as Joi from 'joi';
 import * as moment from 'moment';
 
 export const createUserSchema = Joi.object({
+  email: Joi.string().email().required(),
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
   location: Joi.string()
@@ -37,6 +38,7 @@ export const createUserSchema = Joi.object({
 });
 
 export interface CreateUserDto {
+  email: string;
   first_name: string;
   last_name: string;
   birthday: string;

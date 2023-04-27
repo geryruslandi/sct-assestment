@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
+import { FailedBirthdayNofication } from '@src/models/failed-birthday-notification.model';
 import { User } from '@src/models/user.model';
+import { fetchWithTimeout } from '@src/utils/helper';
 import * as moment from 'moment';
 import { schedule } from 'node-cron';
 import { Op } from 'sequelize';
@@ -10,10 +12,13 @@ export class BirthdayNotificationService {
   constructor(
     @InjectModel(User)
     private user: typeof User,
+    @InjectModel(FailedBirthdayNofication)
+    private failedBirthdayNotification: typeof FailedBirthdayNofication,
   ) {}
 
   // 24 hours format
   private relativeTimeToPublish = 9;
+  private publishBirthdayNotificationRetryLimit = 3;
 
   onApplicationBootstrap = async (): Promise<void> => {
     schedule('0 * * * *', async () => {
@@ -22,6 +27,7 @@ export class BirthdayNotificationService {
     // this.executeHourlyJob();
   };
 
+  // TODO chunking users process
   public async executeHourlyJob(): Promise<void> {
     const utcsToProceed = this.getUTCSToProceed();
 
@@ -37,6 +43,7 @@ export class BirthdayNotificationService {
       where: {
         [Op.or]: mappedWhere,
       },
+      include: FailedBirthdayNofication,
     });
 
     await Promise.all(
@@ -82,7 +89,70 @@ export class BirthdayNotificationService {
   }
 
   // TODO publish birthday using instructed api
-  private async publishBirthdayNotification(user: User): Promise<void> {}
+  private async publishBirthdayNotification(user: User): Promise<void> {
+    let retry = 0;
 
-  public async executeFailedJob(): Promise<void> {}
+    const publish = async () => {
+      if (retry > this.publishBirthdayNotificationRetryLimit) {
+        throw new Error('Maximum Retry attempted');
+      }
+
+      try {
+        const response = await fetchWithTimeout(
+          'https://email-service.digitalenvision.com.au/send-email',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.email,
+              body: `Hey, ${user.first_name} ${user.last_name} it's your birthday`,
+            }),
+          },
+        );
+
+        if (response.status !== 200) {
+          retry += 1;
+          await publish();
+        }
+      } catch (err) {
+        retry += 1;
+        await publish();
+      }
+    };
+
+    try {
+      await publish();
+      if (user.failedNotification) {
+        await user.failedNotification.destroy();
+      }
+    } catch {
+      if (!user.failedNotification) {
+        await this.failedBirthdayNotification.create({
+          user_id: user.id,
+          birthday_date: moment().format('YYYY-MM-DD'),
+          failed_history: [moment().format('YYYY-MM-DD')],
+        });
+      } else {
+        user.failedNotification.failed_history.push(
+          moment().format('YYYY-MM-DD'),
+        );
+        await user.failedNotification.save();
+      }
+    }
+  }
+
+  public async executeFailedJob(): Promise<void> {
+    const failedUsers = await this.user.findAll({
+      include: {
+        model: FailedBirthdayNofication,
+        required: true,
+      },
+    });
+
+    await Promise.all(
+      failedUsers.map((user) => this.publishBirthdayNotification(user)),
+    );
+  }
 }

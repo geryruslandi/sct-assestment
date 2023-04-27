@@ -1,10 +1,14 @@
-import { Column, DataType, Is, Model, Table } from 'sequelize-typescript';
+import { FailedBirthdayNofication } from '@src/models/failed-birthday-notification.model';
+import { Column, DataType, HasMany, HasOne, Is, Model, Table } from 'sequelize-typescript';
 
 @Table({
   underscored: true,
   tableName: 'users',
 })
 export class User extends Model {
+  @Column
+  email!: string;
+
   @Column
   first_name!: string;
 
@@ -35,4 +39,7 @@ export class User extends Model {
 
   @Column
   birthday_day!: number;
+
+  @HasOne(() => FailedBirthdayNofication)
+  failedNotification!: FailedBirthdayNofication;
 }

@@ -14,6 +14,7 @@ export class UserService {
   public createUser(dto: CreateUserDto): Promise<User> {
     const birthday = moment(dto.birthday, 'DD-MM-YYYY');
     return this.user.create({
+      email: dto.email,
       first_name: dto.first_name,
       last_name: dto.last_name,
       location: dto.location,
