@@ -1,5 +1,5 @@
 import * as Joi from 'joi';
-import moment from 'moment';
+import * as moment from 'moment';
 
 export const createUserSchema = Joi.object({
   first_name: Joi.string().required(),

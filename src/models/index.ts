@@ -1,5 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { FailedBirthdayNofication } from '@src/models/failed-birthday-notification.model';
 import { User } from '@src/models/user.model';
 
 export const generateSequelizeModule = (forTesting = false) =>
@@ -13,7 +14,7 @@ export const generateSequelizeModule = (forTesting = false) =>
       username: config.getOrThrow('DB_USER'),
       password: config.getOrThrow('DB_PASSWORD'),
       database: config.getOrThrow('DB_DATABASE'),
-      models: [User],
-      logging: forTesting ? false : (...data) => console.log(...data),
+      models: [User, FailedBirthdayNofication],
+      logging: forTesting ? false : (query) => console.log(query),
     }),
   });

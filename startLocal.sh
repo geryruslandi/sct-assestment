@@ -12,4 +12,5 @@ docker-compose --env-file .env -f ./docker/docker-compose.yml -p "assestment-sct
 docker-compose --env-file .env -f ./docker/docker-compose.yml -p "assestment-sct" up -d app_db
 
 yarn install
+yarn migrate:up
 yarn start:dev

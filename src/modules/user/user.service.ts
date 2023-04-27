@@ -12,12 +12,14 @@ export class UserService {
   ) {}
 
   public createUser(dto: CreateUserDto): Promise<User> {
-    const birthday = moment(dto.birthday, 'DD-MM-YYYY').format('YYYY-MM-DD');
+    const birthday = moment(dto.birthday, 'DD-MM-YYYY');
     return this.user.create({
       first_name: dto.first_name,
       last_name: dto.last_name,
       location: dto.location,
-      birthday,
+      birthday_month: birthday.month() + 1,
+      birthday_day: birthday.date(),
+      birthday: birthday.format('YYYY-MM-DD'),
     });
   }
 

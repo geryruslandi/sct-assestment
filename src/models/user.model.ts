@@ -1,4 +1,4 @@
-import { Column, Is, Model, Table } from 'sequelize-typescript';
+import { Column, DataType, Is, Model, Table } from 'sequelize-typescript';
 
 @Table({
   underscored: true,
@@ -27,6 +27,12 @@ export class User extends Model {
   @Column
   location!: string;
 
-  @Column
+  @Column(DataType.DATEONLY)
   birthday!: Date;
+
+  @Column
+  birthday_month!: number;
+
+  @Column
+  birthday_day!: number;
 }

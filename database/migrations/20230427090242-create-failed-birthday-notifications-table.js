@@ -1,36 +1,29 @@
 'use strict';
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('failed_birthday_notifications', {
       id: {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.BIGINT,
       },
-      first_name: {
-        type: Sequelize.STRING,
+      user_id: {
+        allowNull: false,
+        type: Sequelize.BIGINT,
+        references: {
+          model: 'users',
+          key: 'id',
+        },
+        onUpdate: 'RESTRICT',
+        onDelete: 'RESTRICT',
+      },
+      birthday_date: {
+        type: Sequelize.DATE,
         allowNull: false,
       },
-      last_name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      location: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      birthday: {
-        type: Sequelize.DATEONLY,
-        allowNull: false,
-      },
-      birthday_month: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      birthday_day: {
-        type: Sequelize.INTEGER,
+      failed_history: {
+        type: Sequelize.ARRAY(Sequelize.DATE),
         allowNull: false,
       },
       created_at: {
@@ -47,6 +40,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('failed_birthday_notifications');
   },
 };
