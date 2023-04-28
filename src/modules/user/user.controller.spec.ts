@@ -13,8 +13,8 @@ describe('UserController', () => {
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
-        generateSequelizeModule(true),
         getConfigModule(true),
+        generateSequelizeModule(true),
         SequelizeModule.forFeature([User]),
       ],
       controllers: [UserController],
@@ -31,6 +31,7 @@ describe('UserController', () => {
 
   it('should be able to create new user with correct data', async () => {
     await controller.store({
+      email: 'geryruslandi@gmail.com',
       first_name: 'gery',
       last_name: 'ruslandi',
       birthday: '01-02-1990',
@@ -45,6 +46,7 @@ describe('UserController', () => {
   it('should not be able to create new user with incorrect location data', async () => {
     expect(async () => {
       await controller.store({
+        email: 'geryruslandi@gmail.com',
         first_name: 'gery',
         last_name: 'ruslandi',
         birthday: '01-02-1990',

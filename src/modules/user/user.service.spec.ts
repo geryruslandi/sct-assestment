@@ -29,6 +29,7 @@ describe('UserService', () => {
 
   it('should able to create user with correct data', async () => {
     const user = await service.createUser({
+      email: 'geryruslandi@gmail.com',
       first_name: 'gery',
       last_name: 'ruslandi',
       birthday: '01-02-1990',
@@ -40,6 +41,7 @@ describe('UserService', () => {
   it('should not be able to create user with incorrect location', async () => {
     expect(async () => {
       await service.createUser({
+        email: 'geryruslandi@gmail.com',
         first_name: 'gery',
         last_name: 'ruslandi',
         birthday: '01-02-1990',
@@ -50,6 +52,7 @@ describe('UserService', () => {
 
   it('should able to destroy correct user', async () => {
     const user = await service.createUser({
+      email: 'geryruslandi@gmail.com',
       first_name: 'gery',
       last_name: 'ruslandi',
       birthday: '01-02-1990',
@@ -65,6 +68,7 @@ describe('UserService', () => {
 
   it('should not be able to destroy unexist user', async () => {
     await service.createUser({
+      email: 'geryruslandi@gmail.com',
       first_name: 'gery',
       last_name: 'ruslandi',
       birthday: '01-02-1990',

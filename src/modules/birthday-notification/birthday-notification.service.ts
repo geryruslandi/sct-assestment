@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { FailedBirthdayNofication } from '@src/models/failed-birthday-notification.model';
 import { User } from '@src/models/user.model';
@@ -6,6 +6,11 @@ import { fetchWithTimeout } from '@src/utils/helper';
 import * as moment from 'moment';
 import { schedule } from 'node-cron';
 import { Op } from 'sequelize';
+
+type NotificationExecutionResult = {
+  id: number;
+  success: boolean;
+};
 
 @Injectable()
 export class BirthdayNotificationService {
@@ -22,13 +27,13 @@ export class BirthdayNotificationService {
 
   onApplicationBootstrap = async (): Promise<void> => {
     schedule('0 * * * *', async () => {
-      await Promise.all([this.executeHourlyJob(), this.executeFailedJob()]);
+      this.executeHourlyJob();
+      this.executeFailedJob();
     });
-    // this.executeHourlyJob();
   };
 
   // TODO chunking users process
-  public async executeHourlyJob(): Promise<void> {
+  public async executeHourlyJob(): Promise<NotificationExecutionResult[]> {
     const utcsToProceed = this.getUTCSToProceed();
 
     const mappedWhere = utcsToProceed.map((utc) => ({
@@ -46,8 +51,23 @@ export class BirthdayNotificationService {
       include: FailedBirthdayNofication,
     });
 
-    await Promise.all(
+    const data = await Promise.all(
       users.map((user) => this.publishBirthdayNotification(user)),
+    );
+
+    return data;
+  }
+
+  public async executeFailedJob(): Promise<NotificationExecutionResult[]> {
+    const failedUsers = await this.user.findAll({
+      include: {
+        model: FailedBirthdayNofication,
+        required: true,
+      },
+    });
+
+    return Promise.all(
+      failedUsers.map((user) => this.publishBirthdayNotification(user)),
     );
   }
 
@@ -88,8 +108,9 @@ export class BirthdayNotificationService {
     return utc > 0 ? `UTC+${utc}` : `UTC${utc}`;
   }
 
-  // TODO publish birthday using instructed api
-  private async publishBirthdayNotification(user: User): Promise<void> {
+  private async publishBirthdayNotification(
+    user: User,
+  ): Promise<NotificationExecutionResult> {
     let retry = 0;
 
     const publish = async () => {
@@ -104,6 +125,7 @@ export class BirthdayNotificationService {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              accept: 'application/json',
             },
             body: JSON.stringify({
               email: user.email,
@@ -127,6 +149,10 @@ export class BirthdayNotificationService {
       if (user.failedNotification) {
         await user.failedNotification.destroy();
       }
+      return {
+        id: user.id,
+        success: true,
+      };
     } catch {
       if (!user.failedNotification) {
         await this.failedBirthdayNotification.create({
@@ -140,19 +166,10 @@ export class BirthdayNotificationService {
         );
         await user.failedNotification.save();
       }
+      return {
+        id: user.id,
+        success: false,
+      };
     }
-  }
-
-  public async executeFailedJob(): Promise<void> {
-    const failedUsers = await this.user.findAll({
-      include: {
-        model: FailedBirthdayNofication,
-        required: true,
-      },
-    });
-
-    await Promise.all(
-      failedUsers.map((user) => this.publishBirthdayNotification(user)),
-    );
   }
 }
