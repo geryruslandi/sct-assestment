@@ -33,3 +33,13 @@ USER nestjs
 EXPOSE 3000
 
 CMD [ "yarn", "start:prod" ]
+
+FROM node:18-alpine AS jestTest
+
+ENV NODE_ENV test
+WORKDIR /app
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . ./
+
+CMD [ "yarn", "test" ]

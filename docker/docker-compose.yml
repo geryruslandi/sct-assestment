@@ -2,6 +2,8 @@ version: '3'
 services:
   app_db:
     image: postgres:13
+    logging:
+      driver: none
     environment:
       POSTGRES_DB: ${DB_DATABASE}
       POSTGRES_USER: ${DB_USER}
@@ -18,5 +20,12 @@ services:
     command: sh -c "yarn migrate:up && yarn start:prod"
     ports:
       - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      - app_db
+  app_service_jest:
+    build:
+      context: ./../
+      dockerfile: ./docker/app-service/Dockerfile
+      target: jestTest
     depends_on:
       - app_db
