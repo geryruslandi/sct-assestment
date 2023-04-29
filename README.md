@@ -1,8 +1,8 @@
 ## Instalation Steps
 - Install Docker
 - install docker-compose
-- create .env for local development and prod env
-- create .env.test for unit test env
+- create .env for local development and prod env referrence .env.example
+- create .env.test for unit test env referrence .env.test.example
 - Run the app
   - run command `./startProd.sh` for prod env
   - run command `./startLocal.sh` for local development
