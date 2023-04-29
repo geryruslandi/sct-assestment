@@ -10,3 +10,13 @@ services:
       - ./app-db/.postgresql:/var/lib/postgresql/data
     ports:
       - '${DB_PORT}:5432'
+  app_service:
+    build:
+      context: ./../
+      dockerfile: ./docker/app-service/Dockerfile
+      target: runner
+    command: sh -c "yarn migrate:up && yarn start:prod"
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      - app_db
