@@ -12,8 +12,6 @@ describe('BirthdayNotificationService', () => {
   let service: BirthdayNotificationService;
 
   beforeEach(async () => {
-    jest.restoreAllMocks();
-
     jest.spyOn(helper, 'fetchWithTimeout').mockReturnValue(
       Promise.resolve({
         status: 200,
@@ -39,6 +37,10 @@ describe('BirthdayNotificationService', () => {
     service = module.get<BirthdayNotificationService>(
       BirthdayNotificationService,
     );
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should only notify birthday to all of user who is having a birthday when its 9am relative to their UTC timezone', async () => {

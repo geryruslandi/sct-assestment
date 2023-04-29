@@ -54,4 +54,28 @@ describe('UserController', () => {
       });
     }).rejects.toThrowError();
   });
+
+  it('should be able to update existing user', async () => {
+    const res = (await controller.store({
+      email: 'geryruslandi@gmail.com',
+      first_name: 'gery',
+      last_name: 'ruslandi',
+      birthday: '01-02-1990',
+      location: 'UTC+2',
+    })) as any;
+
+    const user = res.data.user;
+
+    await controller.update(user.id, {
+      email: 'geryruslandi@gmail.com',
+      first_name: 'gery updated',
+      last_name: 'ruslandi',
+      birthday: '01-02-1990',
+      location: 'UTC+2',
+    });
+
+    await user.reload();
+
+    expect(user.first_name).toBe('gery updated');
+  });
 });

@@ -1,7 +1,7 @@
 import * as Joi from 'joi';
 import * as moment from 'moment';
 
-export const createUserSchema = Joi.object({
+export const userFormSchema = Joi.object({
   email: Joi.string().email().required(),
   first_name: Joi.string().required(),
   last_name: Joi.string().required(),
@@ -37,7 +37,7 @@ export const createUserSchema = Joi.object({
     .required(),
 });
 
-export interface CreateUserDto {
+export interface UserFormSchema {
   email: string;
   first_name: string;
   last_name: string;

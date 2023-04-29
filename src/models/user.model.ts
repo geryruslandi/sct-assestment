@@ -1,5 +1,12 @@
 import { FailedBirthdayNofication } from '@src/models/failed-birthday-notification.model';
-import { Column, DataType, HasMany, HasOne, Is, Model, Table } from 'sequelize-typescript';
+import {
+  Column,
+  DataType,
+  HasOne,
+  Is,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 
 @Table({
   underscored: true,
